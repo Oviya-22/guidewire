@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GigShield | Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="dashboard-body">
+  <div class="dashboard-bg-orb orb-a"></div>
+  <div class="dashboard-bg-orb orb-b"></div>
+
+  <header class="topbar glass">
+    <div class="topbar-left">
+      <div class="brand-icon">GS</div>
+      <div>
+        <h1>GigShield Dashboard</h1>
+        <p> Trigger Monitoring Prototype</p>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="user-badge">
+        <span class="user-label">Signed in as</span>
+        <strong id="welcomeUser">User</strong>
+      </div>
+      <button class="btn btn-secondary" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <main class="dashboard-main">
+    <section class="hero glass">
+      <div>
+        <span class="pill">Automated Parametric Trigger System</span>
+        <h2>Single-city monitoring, policy coverage, and automatic payout eligibility in one workflow</h2>
+        <p class="muted">
+          This version focuses on Chennai delivery partners. It extends the insurance prototype
+          by adding automated disruption monitoring, zone-based trigger activation, and payout queue generation.
+        </p>
+      </div>
+
+      <div class="hero-metrics">
+        <div class="metric-box">
+          <span>City</span>
+          <strong>Chennai</strong>
+        </div>
+        <div class="metric-box">
+          <span>Active Policies</span>
+          <strong id="activePoliciesOut">0</strong>
+        </div>
+        <div class="metric-box">
+          <span>Trigger Status</span>
+          <strong id="globalTriggerOut">Monitoring</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="main-grid">
+      <div class="panel glass">
+        <div class="panel-header">
+          <h3>1. Delivery Partner Profile</h3>
+          <p>Used to estimate risk and weekly premium.</p>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label>Delivery Platform</label>
+            <select id="platform">
+              <option value="Swiggy">Swiggy</option>
+              <option value="Zomato">Zomato</option>
+              <option value="Blinkit">Blinkit</option>
+              <option value="Zepto">Zepto</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Primary Chennai Zone</label>
+            <select id="zone">
+              <option value="North Chennai">North Chennai</option>
+              <option value="Central Chennai">Central Chennai</option>
+              <option value="South Chennai">South Chennai</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Average Weekly Income (₹)</label>
+            <input type="number" id="weeklyIncome" value="4500" />
+          </div>
+
+          <div class="field">
+            <label>Average Working Days per Week</label>
+            <input type="number" id="workingDays" value="6" min="1" max="7" />
+          </div>
+
+          <div class="field">
+            <label>Average Hours per Day</label>
+            <input type="number" id="hoursPerDay" value="9" min="1" max="16" />
+          </div>
+
+          <div class="field">
+            <label>Historical Disruption Exposure (0-10)</label>
+            <input type="number" id="exposureScore" value="6" min="0" max="10" />
+          </div>
+        </div>
+
+        <div class="action-row">
+          <button class="btn btn-primary" onclick="calculatePremium()">Calculate Premium</button>
+        </div>
+      </div>
+
+      <div class="panel glass">
+        <div class="panel-header">
+          <h3>2. Weekly Premium & Coverage</h3>
+          <p>Generated from risk and earning profile.</p>
+        </div>
+
+        <div class="metric-grid">
+          <div class="metric-card">
+            <span>Weekly Premium</span>
+            <strong id="premiumOut">₹ --</strong>
+          </div>
+          <div class="metric-card">
+            <span>Coverage Limit</span>
+            <strong id="coverageOut">₹ --</strong>
+          </div>
+          <div class="metric-card">
+            <span>Estimated Risk Band</span>
+            <strong id="riskBandOut">--</strong>
+          </div>
+          <div class="metric-card">
+            <span>Loss Ratio Estimate</span>
+            <strong id="lossRatioOut">--</strong>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <strong>Pricing logic:</strong>
+          Weekly premium is derived from income level, working intensity,
+          disruption exposure, and zone-based city risk.
+        </div>
+      </div>
+    </section>
+
+    <section class="main-grid">
+      <div class="panel glass">
+        <div class="panel-header">
+          <h3>3. Create Policy</h3>
+          <p>Generate a weekly income protection policy for automated trigger evaluation.</p>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label>Policy Holder Name</label>
+            <input type="text" id="holderName" placeholder="Enter name" />
+          </div>
+
+          <div class="field">
+            <label>Partner ID</label>
+            <input type="text" id="partnerId" placeholder="Example: CHN-DP-2045" />
+          </div>
+
+          <div class="field">
+            <label>Coverage Start Date</label>
+            <input type="date" id="startDate" />
+          </div>
+
+          <div class="field">
+            <label>Coverage Duration</label>
+            <select id="duration">
+              <option value="1 Week">1 Week</option>
+              <option value="2 Weeks">2 Weeks</option>
+              <option value="4 Weeks">4 Weeks</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="action-row">
+          <button class="btn btn-primary" onclick="createPolicy()">Create Policy</button>
+        </div>
+
+        <div id="policyCard" class="policy-card hidden"></div>
+      </div>
+
+      <div class="panel glass">
+        <div class="panel-header">
+          <h3>4. Automated Trigger Conditions</h3>
+          <p>System activates payout conditions when multiple disruption signals cross threshold values.</p>
+        </div>
+
+        <div class="metric-grid">
+          <div class="metric-card">
+            <span>Rainfall Trigger</span>
+            <strong>> 70 mm</strong>
+          </div>
+          <div class="metric-card">
+            <span>Waterlogging Trigger</span>
+            <strong>> 60%</strong>
+          </div>
+          <div class="metric-card">
+            <span>Wind Trigger</span>
+            <strong>> 45 km/h</strong>
+          </div>
+          <div class="metric-card">
+            <span>Activation Rule</span>
+            <strong>2 of 3 Signals</strong>
+          </div>
+        </div>
+
+        <div class="info-box">
+          Trigger activation is zone-specific. Once activated, eligible policies in that Chennai zone
+          are moved into the payout queue automatically.
+        </div>
+      </div>
+    </section>
+
+    <section class="main-grid">
+      <div class="panel glass">
+        <div class="panel-header">
+          <h3>5. Chennai Monitoring Feed</h3>
+          <p>Simulated automated monitoring for city disruption events.</p>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label>Monitored Zone</label>
+            <select id="monitorZone">
+              <option value="North Chennai">North Chennai</option>
+              <option value="Central Chennai">Central Chennai</option>
+              <option value="South Chennai">South Chennai</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Pattern Mode</label>
+            <select id="monitorMode">
+              <option value="Normal">Normal</option>
+              <option value="Heavy Rain Pattern">Heavy Rain Pattern</option>
+              <option value="Flood Pattern">Flood Pattern</option>
+              <option value="Storm Pattern">Storm Pattern</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="action-row">
+          <button class="btn btn-primary" onclick="startMonitoring()">Start Monitoring</button>
+          <button class="btn btn-secondary" onclick="runSingleCycle()">Run One Cycle</button>
+          <button class="btn btn-secondary" onclick="stopMonitoring()">Stop Monitoring</button>
+        </div>
+
+        <div class="metric-grid claim-results">
+          <div class="metric-card">
+            <span>Rainfall</span>
+            <strong id="rainfallOut">--</strong>
+          </div>
+          <div class="metric-card">
+            <span>Waterlogging</span>
+            <strong id="waterloggingOut">--</strong>
+          </div>
+          <div class="metric-card">
+            <span>Wind Speed</span>
+            <strong id="windOut">--</strong>
+          </div>
+          <div class="metric-card">
+            <span>Zone Trigger</span>
+            <strong id="zoneTriggerOut">Inactive</strong>
+          </div>
+        </div>
+
+        <div id="monitorBanner" class="decision-banner neutral">
+          Monitoring has not started yet.
+        </div>
+      </div>
+
+      <div class="panel glass">
+        <div class="panel-header">
+          <h3>6. Operational Event Log</h3>
+          <p>Records monitoring cycles, trigger activations, and queue actions.</p>
+        </div>
+
+        <div id="eventLog" class="log-box">
+          <div class="log-item">No monitoring events recorded yet.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="main-grid">
+      <div class="panel glass">
+        <div class="panel-header">
+          <h3>7. Active Policy Table</h3>
+          <p>Policies currently enrolled for automatic trigger evaluation.</p>
+        </div>
+
+        <div id="policyTable" class="table-box">
+          <div class="empty-note">No policies created yet.</div>
+        </div>
+      </div>
+
+      <div class="panel glass">
+        <div class="panel-header">
+          <h3>8. Auto Payout Queue</h3>
+          <p>Policies added automatically when trigger conditions are satisfied.</p>
+        </div>
+
+        <div id="payoutQueue" class="table-box">
+          <div class="empty-note">No payout entries generated yet.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel glass">
+      <div class="panel-header">
+        <h3>9. Product Viability Snapshot</h3>
+        <p>Financial view of premium, reserve, and current payout load.</p>
+      </div>
+
+      <div class="metric-grid">
+        <div class="metric-card">
+          <span>Total Weekly Premium</span>
+          <strong id="premiumCollectedOut">₹ --</strong>
+        </div>
+        <div class="metric-card">
+          <span>Expected Payout Reserve</span>
+          <strong id="reserveOut">₹ --</strong>
+        </div>
+        <div class="metric-card">
+          <span>Triggered Events</span>
+          <strong id="triggerCountOut">0</strong>
+        </div>
+        <div class="metric-card">
+          <span>Estimated Queue Load</span>
+          <strong id="queueLoadOut">₹ --</strong>
+        </div>
+      </div>
+
+      <div class="info-box">
+        This Phase 3 version shifts from only claim evaluation to a more software-like parametric flow:
+        monitoring, automated event activation, and payout preparation.
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
